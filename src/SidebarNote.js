@@ -13,11 +13,12 @@ import marked from 'marked';
 import ClientSidebarNote from './SidebarNote.client';
 
 export default function SidebarNote({note}) {
-  const updatedAt = new Date(note.updated_at);
+  const updatedAt = new Date(note.created);
   const lastUpdatedAt = isToday(updatedAt)
     ? format(updatedAt, 'h:mm bb')
     : format(updatedAt, 'M/d/yy');
-  const summary = excerpts(marked(note.body), {words: 20});
+  const summary = excerpts(marked(note.title), {words: 20});
+  console.log(note);
   return (
     <ClientSidebarNote
       id={note.id}

@@ -6,8 +6,25 @@
  *
  */
 
-import {Pool} from 'react-pg';
-import credentials from '../credentials';
+import {fetch} from 'react-fetch';
 
-// Don't keep credentials in the source tree in a real app!
-export const db = new Pool(credentials);
+export const POST = (url, parameters) => {
+
+    let accessToken = "7f16944b0936d712cb80889f6d909bb7ae8d76cd";
+
+    const response = fetch(url, {
+        body: JSON.stringify(parameters),
+        credentials: "same-origin",
+        headers: {
+            "Content-Type": "application/json",
+            Cookie: `_cosmos_auth=${ accessToken }`
+        },
+        method: "POST",
+        cache: "no-cache",
+        mode: "cors",
+        redirect: "follow",
+        referrerPolicy: "no-referrer"
+    });
+
+    return response.json();
+};

@@ -18,6 +18,7 @@ babelRegister({
   plugins: ['@babel/transform-modules-commonjs'],
 });
 
+const fetch = require("isomorphic-fetch");
 const express = require('express');
 const compress = require('compression');
 const {readFileSync} = require('fs');
@@ -51,11 +52,9 @@ app
       case 'EACCES':
         console.error(bind + ' requires elevated privileges');
         process.exit(1);
-        break;
       case 'EADDRINUSE':
         console.error(bind + ' is already in use');
         process.exit(1);
-        break;
       default:
         throw error;
     }
@@ -167,6 +166,44 @@ app.get(
     res.json(rows);
   })
 );
+
+app.get(
+    '/apiv1',
+    handleErrors(async function(_req, res) {
+        let accessToken = "7f16944b0936d712cb80889f6d909bb7ae8d76cd";
+
+        const parameters = {
+            /* eslint-disable @typescript-eslint/naming-convention -- CosMoS API Requirement */
+            exclude_fields: ["widgets", "plain_text"],
+            publication: "bl",
+            limit: "20"
+            /* eslint-enable @typescript-eslint/naming-convention */
+        };
+
+        fetch('https://www.businesslive.co.za/apiv1/pub/articles/get-all', {
+            body: JSON.stringify(parameters),
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: `_cosmos_auth=${ accessToken }`
+            },
+            method: "POST",
+            cache: "no-cache",
+            mode: "cors",
+            redirect: "follow",
+            referrerPolicy: "no-referrer"
+        })
+        .then(function(response) {
+            if (response.status >= 400) {
+                throw new Error("Bad response from server");
+            }
+            return response.json();
+        })
+        .then(function(response) {
+            res.json(response)
+        });
+    })
+  );
 
 app.get(
   '/notes/:id',
